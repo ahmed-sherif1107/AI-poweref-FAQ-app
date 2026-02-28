@@ -1,98 +1,130 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# AI-Powered FAQ App
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A **Retrieval-Augmented Generation (RAG)** backend that lets you upload documents (PDF and TXT), index them in a vector store, and get AI-generated answers to questions based on your content. Built with **NestJS**, **LangChain**, **ChromaDB**, and **Groq** (LLM).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## What This Project Does
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Document ingestion**: Upload PDF or plain-text files. Documents are split into chunks, embedded with [Hugging Face](https://huggingface.co/) embeddings, and stored in [ChromaDB](https://www.trychroma.com/) for semantic search.
+- **RAG-based Q&A**: When you ask a question, the app finds the most relevant chunks, passes them as context to an LLM (Groq / Llama 3.1), and returns an answer grounded in your documents, with optional source filenames and relevance scores.
+- **Document management**: List indexed documents, delete by filename, and avoid re-indexing duplicates (via file hash).
+- **Flexible ChromaDB setup**: Use a local ChromaDB server, in-memory storage, or Chroma Cloud, configured via environment variables.
 
-## Project setup
+---
 
-```bash
-$ yarn install
-```
+## Tech Stack
 
-## Compile and run the project
+| Layer        | Technology |
+|-------------|------------|
+| Backend     | NestJS (Node.js / TypeScript) |
+| RAG / LLM   | LangChain, LangGraph |
+| Embeddings  | Hugging Face Inference API (e.g. `sentence-transformers/all-MiniLM-L6-v2`) |
+| Vector DB   | ChromaDB (local, in-memory, or Chroma Cloud) |
+| LLM         | Groq (`llama-3.1-8b-instant`) |
 
-```bash
-# development
-$ yarn run start
+---
 
-# watch mode
-$ yarn run start:dev
+## Prerequisites
 
-# production mode
-$ yarn run start:prod
-```
+- **Node.js** (v18+)
+- **Yarn**
+- **ChromaDB** (unless using in-memory mode):  
+  e.g. `docker run -p 8000:8000 chromadb/chroma`
+- **API keys** (see [Environment variables](#environment-variables))
 
-## Run tests
+---
+
+## Project Setup
 
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+yarn install
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Environment Variables
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Create a `.env` in the project root. Example:
+
+```env
+# Required for embeddings
+HUGGINGFACE_API_KEY=your_huggingface_api_key
+
+# Required for LLM answers (Groq)
+GROQ_API_KEY=your_groq_api_key
+
+# Optional: ChromaDB
+CHROMA_URL=http://localhost:8000
+CHROMA_COLLECTION=rag_documents
+
+# Optional: use Chroma Cloud instead of local
+# CHROMA_USE_CLOUD=true
+# CHROMA_API_KEY=...
+# CHROMA_TENANT=...
+# CHROMA_DATABASE=...
+
+# Optional: in-memory ChromaDB (no server; data lost on restart)
+# CHROMA_IN_MEMORY=true
+
+# Optional: chunking
+# CHUNK_SIZE=1000
+# CHUNK_OVERLAP=200
+# EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
+
+PORT=3000
+```
+
+---
+
+## Run the Project
 
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+# Development (watch mode)
+yarn run start:dev
+
+# Production
+yarn run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+API base: `http://localhost:3000` (or your `PORT`).
 
-## Resources
+---
 
-Check out a few resources that may come in handy when working with NestJS:
+## API Overview
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/rag/upload` | Upload a PDF or TXT file (form field `file`) to index it. |
+| `POST` | `/rag/query` | Send a question; returns an answer using RAG + LLM. Body: `{ "question": "...", "topK?: number", "minScore?: number" }`. |
+| `GET`  | `/rag/documents` | List indexed documents (filename, upload date, chunk count). |
+| `DELETE` | `/rag/documents` | Delete all chunks for a document. Body: `{ "filename": "..." }`. |
+| `GET`  | `/rag/health` | RAG/ChromaDB health check. |
+| `POST` | `/ask` | Direct LLM call (no RAG). Body: `{ "question": "..." }`. |
 
-## Support
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Run Tests
 
-## Stay in touch
+```bash
+yarn run test           # unit tests
+yarn run test:e2e       # e2e tests
+yarn run test:cov       # coverage
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+---
+
+## For Your CV
+
+You can use these bullets to describe this project on your CV or portfolio:
+
+- **Built an AI-powered FAQ/Q&A backend** using Retrieval-Augmented Generation (RAG) with NestJS, LangChain, ChromaDB, and Groq, enabling semantic search over custom documents and LLM-generated answers with source attribution.
+- **Implemented end-to-end document ingestion**: PDF and text uploads, configurable chunking (RecursiveCharacterTextSplitter), Hugging Face embeddings, vector storage in ChromaDB, and duplicate detection via file hashing.
+- **Designed a REST API** for document upload, RAG-based querying with configurable `topK` and optional score filtering, document listing and deletion, and a health check endpoint; integrated a separate direct-LLM endpoint for non-RAG use cases.
+- **Supported multiple deployment options** for the vector store (local ChromaDB server, in-memory mode, or Chroma Cloud) via environment configuration, with structured logging and error handling across the RAG pipeline.
+
+---
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT (or as specified in the repository).
