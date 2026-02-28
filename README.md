@@ -114,17 +114,6 @@ yarn run test:cov       # coverage
 
 ---
 
-## For Your CV
-
-You can use these bullets to describe this project on your CV or portfolio:
-
-- **Built an AI-powered FAQ/Q&A backend** using Retrieval-Augmented Generation (RAG) with NestJS, LangChain, ChromaDB, and Groq, enabling semantic search over custom documents and LLM-generated answers with source attribution.
-- **Implemented end-to-end document ingestion**: PDF and text uploads, configurable chunking (RecursiveCharacterTextSplitter), Hugging Face embeddings, vector storage in ChromaDB, and duplicate detection via file hashing.
-- **Designed a REST API** for document upload, RAG-based querying with configurable `topK` and optional score filtering, document listing and deletion, and a health check endpoint; integrated a separate direct-LLM endpoint for non-RAG use cases.
-- **Supported multiple deployment options** for the vector store (local ChromaDB server, in-memory mode, or Chroma Cloud) via environment configuration, with structured logging and error handling across the RAG pipeline.
-
----
-
 ## License
 
 MIT (or as specified in the repository).
